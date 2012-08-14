@@ -1,0 +1,40 @@
+The transport protocol I have designed effectively allows two hosts
+to communicate during a one-way file transfer from a client to a
+server. Below are details.
+
+Packet outline:
+Each datagram sent will have two additional headers, the first indicating the byte location within the file of the first byte (start) in the packet and the last byte
+in the packet (end) respectively. In addition to byte location, these numbers are also used to indicate FIN packets.
+
+File descriptor:
+The file descriptor is the first packet sent by the client, and once the client receives a response packet, this packet will never be retransmitted. The start header
+of the file descriptor will always be set to the negative number of bytes of the file description length, and the end header will always be set to 0. This allows the
+response to this packet to be integrated into the general traffic loop, with the server requesting 0 as the next byte to be sent. Example file descriptor packet:
+-13             0
+text.txt 1024
+
+Other packets:
+The start and end headers are included so that client and server can quickly determine which packets are duplicates and which are new, calculate packet length, and
+keep track of overall transfer progress. 16 bytes of the UDP payload are reserved for each of these headers, reducing the payload by 32 bytes and limiting file size
+to some fairly large figure in bytes.
+
+ProtogramPackets:
+This is essentially a wrapper class for a DatagramPacket. Both the client and the server have a dock into which DatagramPackets are received. Each datagram is turned
+into a protogram after it is received so that it's fields can be more easily accessed, and turned back into a datagram so it can be sent via DatagramSocket.
+Protograms and datagrams are easily interchangeable due to the class's methods. The class also contains a writePayload() method that writes the bytes to a stream and
+it's own equals() method.
+
+Process:
+Client sends file descriptor, server receives file descriptor.
+Server sends response, indicating to start sending bytes at 0.
+Loop:
+Client sends data up to byte n.
+Server receives up to byte n, and responds with end header = n.
+Add packet size to n.
+End loop.
+Once the server requests a packet with byte number higher than the size of the file, the client exits the traffic loop and sends a FIN packet, which is indicated by
+a packet with both start and end headers -1.
+Once the server receives a FIN packet, it exits its traffic loop.
+During the client FIN phase, if it receives a FIN packet, it will terminate. If it receives anything but a FIN packet, it will resend a FIN packet. If 20 packets are
+sent with no response, the server is assumed dead and the client terminates.
+The server will send one FIN packet once it exits the traffic loop and then terminate. If it is not delivered, the client is left to timeout.
