@@ -1,9 +1,0 @@
-Elrod_Jay-udp_reliable_transfer:
-total 20
--rw-r--r--. 1 temp 2852 Mar 23 21:47 Protocol.txt
--rw-r--r--. 1 temp 3035 Mar 23 20:15 ProtogramPacket.java
--rw-r--r--. 1 temp  464 Mar 23 21:38 README.txt
--rw-r--r--. 1 temp    0 Mar 23 21:49 rec71184
--rw-r--r--. 1 temp 3593 Mar 23 21:46 UrftClient.java
--rw-r--r--. 1 temp 3020 Mar 23 21:26 UrftServer.java
-/home/temps/elrod/cs4760/Elrod_Jay-udp_reliable_transfer:/home/work/cs4760
